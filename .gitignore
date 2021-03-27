@@ -1,8 +1,9 @@
 *.log
 *.pyc
-*.xlsx#
-.vscode/settings.json
+*.xlsx
 *.json
 *.db
-.google-cookie
 *.jpg
+
+./settings.json
+.google-cookie
