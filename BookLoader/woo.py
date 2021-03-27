@@ -1,11 +1,13 @@
 '''WooCommerce API integrator'''
-import configparser # Read config file.
-import os # Just os module?
-import logging # Logging errors.
-import inspect # Get function name.
-from pathlib import Path # Create a directory if needed.
-from woocommerce import API as woo # woocommerce API
-from wp import main as wp # WordPress API
+import configparser  # Read config file.
+import inspect  # Get function name.
+import logging  # Logging errors.
+import os  # Just os module?
+from pathlib import Path  # Create a directory if needed.
+
+from woocommerce import API as woo  # woocommerce API
+
+from wp import main as wp  # WordPress API
 
 current_dir = (os.path.dirname(os.path.realpath(__file__)))
 Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
@@ -21,7 +23,7 @@ class WooCommerce: # pylint: disable=too-few-public-methods
     def __init__(self, book):
         '''init Woo class'''
         config = configparser.ConfigParser()
-        config.read(os.path.dirname(__file__) + '/conf.ini')
+        config.read(os.path.dirname(__file__) + 'config/conf.ini')
         self.woo_url = config.get("WooCommerce", "url")
         self.woo_key = config.get("WooCommerce", "key")
         self.woo_secret = config.get("WooCommerce", "secret")

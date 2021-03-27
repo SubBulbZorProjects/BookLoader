@@ -66,7 +66,7 @@ class Ui_Settings(object):
 
         # Set Parser for config.ini
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__),'conf.ini'))
+        config.read(os.path.join(os.path.dirname(__file__),'config/conf.ini'))
 
         # Save synonims dictionary
         self.save_category_synonims()
@@ -131,9 +131,9 @@ class Ui_Settings(object):
             self.msg.setIcon(QtWidgets.QMessageBox.Warning)
             self.msg.setText("Ustawienia nie zostły zaktualizowane")
         else:
-            with open(os.path.join(os.path.dirname(__file__), 'conf.ini'), 'w') as configfile: # Save conf.ini
+            with open(os.path.join(os.path.dirname(__file__), 'config/conf.ini'), 'w') as configfile: # Save conf.ini
                 config.write(configfile)
-            with open(os.path.join(os.path.dirname(__file__), 'category.ini'), 'w') as configfile: # Save category.ini
+            with open(os.path.join(os.path.dirname(__file__), 'config/category.ini'), 'w') as configfile: # Save category.ini
                 self.category_config.write(configfile)
             self.msg.setIcon(QtWidgets.QMessageBox.Information)
             self.msg.setText("Ustawienia zostły zaktualizowane")
@@ -145,7 +145,7 @@ class Ui_Settings(object):
     def setupUi(self, Dialog):
         self.change = False
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__),'conf.ini'))
+        config.read(os.path.join(os.path.dirname(__file__),'config/conf.ini'))
 
         self.cat_list = ast.literal_eval(config.get("Category", "categories")) # Get actual list
 
@@ -399,7 +399,7 @@ class Ui_Settings(object):
 
         self.category_config = configparser.ConfigParser()
         self.category_config.optionxform = str
-        self.category_config.read(os.path.join(os.path.dirname(__file__), 'category.ini'))
+        self.category_config.read(os.path.join(os.path.dirname(__file__), 'config/category.ini'))
     
     
         self.set_category_mapper()

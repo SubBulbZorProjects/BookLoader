@@ -7,3 +7,4 @@
 
 ./settings.json
 .google-cookie
+__pycache__

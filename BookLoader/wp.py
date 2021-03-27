@@ -1,13 +1,15 @@
 '''WordPress API integrator'''
-import configparser # Read config file.
-import os # Just os module?
-import base64 # Data encodings.
-import logging # Logging errors.
-import inspect # Get function name.
-import requests # Requests HTTP Library.
+import base64  # Data encodings.
+import configparser  # Read config file.
+import inspect  # Get function name.
+import logging  # Logging errors.
+import os  # Just os module?
+from pathlib import Path  # Create a directory if needed.similarity.
 
+import requests  # Requests HTTP Library.
 
 current_dir = (os.path.dirname(os.path.realpath(__file__)))
+Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
 logging_path = os.path.join(current_dir, "logs", "WP.log")
 
 # DEBUG -> WARNING :
@@ -20,7 +22,7 @@ class WordPress: # pylint: disable=too-few-public-methods
     def __init__(self, image):
         '''init WordPress class'''
         config = configparser.ConfigParser()
-        config.read(os.path.dirname(__file__) + '/conf.ini')
+        config.read(os.path.dirname(__file__) + 'config/conf.ini')
         self.wp_url = config.get("WordPress", "url")
         self.wp_user = config.get("WordPress", "user")
         self.wp_pass = config.get("WordPress", "password")

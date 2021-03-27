@@ -10,4 +10,5 @@ Book Loader tool.
 py -m pip install -r requirements.txt
 ```
 
-### Configure .ini file [conf](conf.ini)
+### Configure .ini file [conf](config/conf.ini)
+

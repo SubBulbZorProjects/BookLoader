@@ -10,6 +10,7 @@ def get_image(image_url, isbn):
     '''Get api request'''
 
     current_dir = (os.path.dirname(os.path.realpath(__file__)))
+    Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
     logging_path = os.path.join(current_dir, "logs", "image.log")
 
     logging.basicConfig(filename=logging_path, level=logging.DEBUG,
@@ -17,7 +18,7 @@ def get_image(image_url, isbn):
     logger=logging.getLogger(__name__)
 
     config = configparser.ConfigParser()
-    config.read(current_dir + '/conf.ini')
+    config.read(current_dir + 'config/conf.ini')
     image_folder = config.get("General", "image_folder")
 
     try:

@@ -1,16 +1,21 @@
 '''book'''
-import configparser # Read config file.
-import os # Just os module?
-from threading import Thread # Multi thread.
-import re # Regex.
-import logging # Logging errors.
-import ast # Use to read list from config file.
-from fuzzywuzzy import fuzz # String similarity.
-import requests as req # Requests HTTP Library.
-from private.amazon_scrapper import main as amazon_scrapper # Amazon scrapper.
-from private.goodread_scrapper import goodread_search as goodreads_scrapper # goodreads scrapper.
+import ast  # Use to read list from config file.
+import configparser  # Read config file.
+import logging  # Logging errors.
+import os  # Just os module?
+import re  # Regex.
+from pathlib import Path  # Create a directory if needed.similarity.
+from threading import Thread  # Multi thread.
+
+import requests as req  # Requests HTTP Library.
+from fuzzywuzzy import fuzz  # String
+
+from private.amazon_scrapper import main as amazon_scrapper  # Amazon scrapper.
+from private.goodread_scrapper import \
+    goodread_search as goodreads_scrapper  # goodreads scrapper.
 
 current_dir = (os.path.dirname(os.path.realpath(__file__)))
+Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
 logging_path = os.path.join(current_dir, "logs", "book.log")
 
 logging.basicConfig(filename=logging_path, level=logging.WARNING,
@@ -23,7 +28,7 @@ class Books: # pylint: disable=too-few-public-methods, too-many-instance-attribu
         '''init Book class'''
         self.isbn = isbn
         config = configparser.ConfigParser()
-        config.read(os.path.dirname(__file__) + '/conf.ini')
+        config.read(os.path.dirname(__file__) + 'config/conf.ini')
         self.google_token = config.get("Google", "token")
         self.isbndb_token = config.get("ISBNdb", "token")
         self.google_url = config.get("Google", "url")
@@ -354,7 +359,7 @@ class Fuzzer:
         # Load ini variables.
         try:
             self.config = configparser.ConfigParser()
-            self.config.read(os.path.dirname(__file__) + '/conf.ini')
+            self.config.read(os.path.dirname(__file__) + 'config/conf.ini')
             self.main_list = ast.literal_eval(self.config.get("Category", "categories"))
             self.discard_list = ast.literal_eval(self.config.get("Validator", "discard"))
             self.threshold = self.config.get("Category", "threshold")
@@ -364,7 +369,7 @@ class Fuzzer:
 
     def __mapper(self):
         '''Map category'''
-        self.config.read(os.path.dirname(__file__) + '/category.ini')
+        self.config.read(os.path.dirname(__file__) + 'config/category.ini')
 
         for category in self.main_list:
             try:
@@ -440,7 +445,7 @@ class Fuzzer:
 def validator(validation_list): # pylint: disable=too-many-branches, too-many-return-statements
     '''Clear lists of unwanted objects and choose the right one'''
     config = configparser.ConfigParser()
-    config.read(os.path.dirname(__file__) + '/conf.ini')
+    config.read(os.path.dirname(__file__) + 'config/conf.ini')
     discard_list = ast.literal_eval(config.get("Validator", "discard"))
     priority = config.get("Validator", "priority")
     source_list = [list(source.values())[0] for source in validation_list]

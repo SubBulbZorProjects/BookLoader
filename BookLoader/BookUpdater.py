@@ -104,7 +104,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.threadpool = QtCore.QThreadPool() # pylint: disable=(c-extension-no-member)
 
         self.config = configparser.ConfigParser()
-        self.config.read(os.path.join(os.path.dirname(__file__),'conf.ini'))
+        self.config.read(os.path.join(os.path.dirname(__file__),'config/conf.ini'))
 
         self.gui = {
             'google'            :util.strtobool(self.config.get('Source', 'google')),
@@ -528,7 +528,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
 
         # Set Parser for config.ini
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'conf.ini'))
+        config.read(os.path.join(os.path.dirname(__file__), 'config/conf.ini'))
         self.settings_ui.isbndb_check_box.setChecked(util.strtobool(config.get('Source', 'isbndb')))
         self.settings_ui.google_check_box.setChecked(util.strtobool(config.get('Source', 'google')))
         self.settings_ui.amazon_check_box.setChecked(util.strtobool(config.get('Source', 'amazon')))
@@ -542,7 +542,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def categories_main_list(self):
         ''' Category list '''
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'conf.ini'))
+        config.read(os.path.join(os.path.dirname(__file__), 'config/conf.ini'))
         self.category_completer_list = ast.literal_eval(config.get("Category", "categories"))
         return self.category_completer_list
 
