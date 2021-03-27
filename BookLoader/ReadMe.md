@@ -86,3 +86,5 @@ The **get_product** function allows you to retrieve information about an existin
 [wp.py](wp.py) is responsible for supporting the WordPress API.
 the **main** function allows you to upload an image to a media library.  
 The image is uploaded as the full local path, the url is returned.
+
+**image_downloader.py** *is responsible for downloading the image.*
