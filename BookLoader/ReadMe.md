@@ -75,5 +75,14 @@ The Source section allows you to decide which source should be used by the progr
 
 ## Individual files
 
-Woo py...
-[woo.py](woo.py)
+[book.py](book.py) is the core of project.
+
+[image_downloader.py](image_downloader.py) as the name says, he gets a picture. **get_image** function requires a link to the image and the target name, the image is saved in the path indicated in the **[conf](config/conf.ini)** file -> **General** -> **image_folder**.
+
+[woo.py](woo.py) is responsible for supporting the WooCommerce API.
+The **main** function realizes the creation of a new product.
+The **get_product** function allows you to retrieve information about an existing product.
+
+[wp.py](wp.py) is responsible for supporting the WordPress API.
+the **main** function allows you to upload an image to a media library.  
+The image is uploaded as the full local path, the url is returned.
