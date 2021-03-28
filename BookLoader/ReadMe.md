@@ -77,6 +77,8 @@ The Source section allows you to decide which source should be used by the progr
 
 [book.py](book.py) is the core of project.
 
+[book_loader.py](book_loader.py) is the PyQt5 GUI.
+
 [image_downloader.py](image_downloader.py) as the name says, he gets a picture. **get_image** function requires a link to the image and the target name, the image is saved in the path indicated in the **[conf](config/conf.ini)** file -> **General** -> **image_folder**.
 
 [woo.py](woo.py) is responsible for supporting the WooCommerce API.
