@@ -104,7 +104,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.threadpool = QtCore.QThreadPool() # pylint: disable=(c-extension-no-member)
 
         self.config = configparser.ConfigParser()
-        self.config.read(os.path.join(os.path.dirname(__file__),'config/conf.ini'))
+        self.config.read(os.path.join(os.path.dirname(__file__),'config', 'conf.ini'))
 
         self.gui = {
             'google'            :util.strtobool(self.config.get('Source', 'google')),
@@ -122,7 +122,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         }
         self.current_dir = pathlib.Path(__file__).parent # Setting curret ABS path
 
-        self.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir,'private',"bookloader.png"))) # pylint: disable=(c-extension-no-member)
+        self.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member)
         self.setWindowTitle("Book Loader")
 
         self.progress_bar = QtWidgets.QProgressBar() # pylint: disable=(c-extension-no-member)
@@ -191,13 +191,9 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
 
     #     self.load_button2.clicked.connect(self.search_in_book)
 
-
     # def search_in_book(self):
+        # ''' Download afresh book details ''' 
     #     self.clear_line_edit()
-    #     self.dictionary = {}
-    #     self.dictionary = copy.deepcopy(self.dictionary_book)
-    #     self.put_dict()
-
 
     def get_shortname_colon(self):
         ''' Remove subtitle between colon and dash '''
@@ -205,6 +201,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         short = re.sub(colon, " - ", self.name_line.toPlainText())
         self.name_line.setText(short)
         self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+        self.amount_line.setFocus()
 
     def get_shortname_comma(self):
         ''' Remove subtitle between comma and dash '''
@@ -212,20 +209,22 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         short = re.sub(comma, " - ", self.name_line.toPlainText())
         self.name_line.setText(short)
         self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+        self.amount_line.setFocus()
 
-    # def get_shortname_parenthesis(self):
-    #     ''' Remove subtitle between parenthesis and dash '''
-    #     parenthesis = re.compile('(.*?)-')
-    #     short = re.sub(parenthesis, " - ", self.name_line.toPlainText())
-    #     self.name_line.setText(short)
-    #     self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+    def get_shortname_parenthesis(self):
+        ''' Remove subtitle between parenthesis and dash '''
+        parenthesis = re.compile("\((.*?)-")
+        short = re.sub(parenthesis, " - ", self.name_line.toPlainText())
+        self.name_line.setText(short)
+        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+        self.amount_line.setFocus()
 
     def progress_fn(self):
         ''' Progress bar method'''
         self.progress_bar.setValue(0)
         QtCore.QCoreApplication.processEvents() # pylint: disable=(c-extension-no-member)
         self.msg_box.setWindowTitle('Pobieranie danych')
-        self.msg_box.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir,'private',"bookloader.png"))) # pylint: disable=(c-extension-no-member),(line-too-long)
+        self.msg_box.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member),(line-too-long)
         self.msg_box.setText('Pobieranie danych')
         self.msg_box.show()
         QtCore.QCoreApplication.processEvents() # pylint: disable=(c-extension-no-member)
@@ -391,7 +390,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
 
         if (self.price_line.text() == '') or (self.amount_line.text() == '')or (self.description_text_edit.toPlainText() == '') or (self.name_line.toPlainText() == '') or (self.title_line.text() == '') or (self.author_line.text() == '') or (self.publisher_line.text() == '') or (self.year_line.text() == '') or (self.category_line.text() == ''): # pylint: disable=(line-too-long)
             self.msg_to_send.setWindowTitle('Uwaga!')
-            self.msg_to_send.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir,'private',"bookloader.png"))) # pylint: disable=(c-extension-no-member),(line-too-long)
+            self.msg_to_send.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member),(line-too-long)
             self.msg_to_send.setIcon(QtWidgets.QMessageBox.Warning) # pylint: disable=(c-extension-no-member)
             self.msg_to_send.setText('Podaj resztę danych')
             self.msg_to_send.show()
@@ -520,7 +519,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def open_settings(self):
         ''' Open settings method '''
         self.settings_window = QtWidgets.QDialog() # pylint: disable=(attribute-defined-outside-init),(c-extension-no-member)
-        self.settings_window.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir,'private',"bookloader.png"))) # pylint: disable=(c-extension-no-member)
+        self.settings_window.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member)
         self.settings_ui = Ui_Settings() # pylint: disable=(attribute-defined-outside-init)
         self.settings_ui.setupUi(self.settings_window)
 
@@ -528,7 +527,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
 
         # Set Parser for config.ini
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'config/conf.ini'))
+        config.read(os.path.join(os.path.dirname(__file__), 'config', 'conf.ini'))
         self.settings_ui.isbndb_check_box.setChecked(util.strtobool(config.get('Source', 'isbndb')))
         self.settings_ui.google_check_box.setChecked(util.strtobool(config.get('Source', 'google')))
         self.settings_ui.amazon_check_box.setChecked(util.strtobool(config.get('Source', 'amazon')))
@@ -542,7 +541,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def categories_main_list(self):
         ''' Category list '''
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'config/conf.ini'))
+        config.read(os.path.join(os.path.dirname(__file__), 'config', 'conf.ini'))
         self.category_completer_list = ast.literal_eval(config.get("Category", "categories"))
         return self.category_completer_list
 
