@@ -23,7 +23,7 @@ class WooCommerce: # pylint: disable=too-few-public-methods
     def __init__(self, book):
         '''init Woo class'''
         config = configparser.ConfigParser()
-        config.read(os.path.dirname(__file__) + 'config/conf.ini')
+        config.read(os.path.join(os.path.dirname(__file__), 'config', 'conf.ini'))
         self.woo_url = config.get("WooCommerce", "url")
         self.woo_key = config.get("WooCommerce", "key")
         self.woo_secret = config.get("WooCommerce", "secret")

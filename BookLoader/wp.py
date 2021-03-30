@@ -22,7 +22,7 @@ class WordPress: # pylint: disable=too-few-public-methods
     def __init__(self, image):
         '''init WordPress class'''
         config = configparser.ConfigParser()
-        config.read(os.path.dirname(__file__) + 'config/conf.ini')
+        config.read(os.path.join(os.path.dirname(__file__), 'config', 'conf.ini'))
         self.wp_url = config.get("WordPress", "url")
         self.wp_user = config.get("WordPress", "user")
         self.wp_pass = config.get("WordPress", "password")

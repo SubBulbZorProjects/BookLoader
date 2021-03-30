@@ -18,7 +18,7 @@ def get_image(image_url, isbn):
     logger=logging.getLogger(__name__)
 
     config = configparser.ConfigParser()
-    config.read(current_dir + 'config/conf.ini')
+    config.read(os.path.join(current_dir, 'config', 'conf.ini'))
     image_folder = config.get("General", "image_folder")
 
     try:
