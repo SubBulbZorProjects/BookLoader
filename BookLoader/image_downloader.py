@@ -43,7 +43,7 @@ def get_image(image_url, isbn):
     try:
         path = os.path.join(image_path, str(isbn)+".jpg")
         request = requests.get(image_url, stream=True)
-                
+
         if request.status_code == 200:
             with open(path, 'wb') as file:
                 request.raw.decode_content = True
