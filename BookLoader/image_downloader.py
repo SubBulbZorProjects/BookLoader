@@ -1,17 +1,24 @@
 '''download image'''
-import configparser # Read config file.
-import os # Just os module?
-import logging # Logging errors.
-from pathlib import Path # Create a directory if needed.
-import urllib.request # Download image.
-import shutil # Clear directory.
+import configparser  # Read config file.
+import logging  # Logging errors.
+import os  # Just os module?
+import shutil  # Clear directory.
+from pathlib import Path  # Create a directory if needed.
+
+import requests  # Download image.
+import requests_cache  # Cache scrapped image.
+
 
 def get_image(image_url, isbn):
     '''Get api request'''
 
     current_dir = (os.path.dirname(os.path.realpath(__file__)))
+
     Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
+    Path(os.path.join(current_dir, "cache")).mkdir(parents=True, exist_ok=True)
+
     logging_path = os.path.join(current_dir, "logs", "image.log")
+    cache = os.path.join(current_dir, "cache", "scraper_cache")
 
     logging.basicConfig(filename=logging_path, level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s %(name)s %(message)s')
@@ -20,6 +27,8 @@ def get_image(image_url, isbn):
     config = configparser.ConfigParser()
     config.read(os.path.join(current_dir, 'config', 'conf.ini'))
     image_folder = config.get("General", "image_folder")
+
+    requests_cache.install_cache(cache, backend='sqlite', expire_after=300)
 
     try:
         image_path = os.path.join(current_dir, image_folder)
@@ -32,9 +41,15 @@ def get_image(image_url, isbn):
         logger.info(error)
 
     try:
-        request = urllib.request.urlretrieve(image_url, os.path.join(image_path, str(isbn)+".jpg"))
-        if request[0]:
-            return request[0]
+        path = os.path.join(image_path, str(isbn)+".jpg")
+        request = requests.get(image_url, stream=True)
+                
+        if request.status_code == 200:
+            with open(path, 'wb') as file:
+                request.raw.decode_content = True
+                shutil.copyfileobj(request.raw, file)  
+                print(request.from_cache)
+                return path
 
     except Exception as error: # pylint: disable=broad-except
         logger.info(error)
