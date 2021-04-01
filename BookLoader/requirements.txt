@@ -9,3 +9,4 @@ PyQt5
 beautifulsoup4
 google
 lxml
+requests-cache
