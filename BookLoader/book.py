@@ -4,18 +4,16 @@ import configparser  # Read config file.
 import logging  # Logging errors.
 import os  # Just os module?
 import re  # Regex.
-from pathlib import Path  # Create a directory if needed.similarity.
 from threading import Thread  # Multi thread.
 
 import requests as req  # Requests HTTP Library.
-from fuzzywuzzy import fuzz  # String
+from fuzzywuzzy import fuzz  # String similarity.
 
 from private.amazon_scrapper import main as amazon_scrapper  # Amazon scrapper.
 from private.goodread_scrapper import \
     goodread_search as goodreads_scrapper  # goodreads scrapper.
 
 current_dir = (os.path.dirname(os.path.realpath(__file__)))
-Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
 logging_path = os.path.join(current_dir, "logs", "book.log")
 
 logging.basicConfig(filename=logging_path, level=logging.WARNING,
@@ -325,7 +323,9 @@ class Books: # pylint: disable=too-few-public-methods, too-many-instance-attribu
             data_thread_3.join()
             data_thread_4.join()
 
-            image = validator(self.image_list) # pylint: disable=unused-variable
+            # image = validator(self.image_list) # pylint: disable=unused-variable
+
+            image = self.image_list # pylint: disable=unused-variable
             title = validator(self.title_list) # pylint: disable=unused-variable
             authors = validator(self.authors_list) # pylint: disable=unused-variable
             binding = validator(self.binding_list) # pylint: disable=unused-variable
