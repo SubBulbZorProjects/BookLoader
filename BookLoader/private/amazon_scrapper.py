@@ -2,7 +2,6 @@
 import re
 from threading import Thread
 import requests
-import lxml
 from bs4 import BeautifulSoup
 from googlesearch import search
 
@@ -194,7 +193,7 @@ class AmazonScrapper:
         if self.authors_list:
             self.amazon_dict['author'] = self.authors_list[0]
         if self.image_list:
-            self.amazon_dict['image'] = self.image_list[0]
+            self.amazon_dict['image'] = self.image_list
         if self.publisher_list:
             self.amazon_dict['publisher'] = self.publisher_list[0]
         if self.year_list:
