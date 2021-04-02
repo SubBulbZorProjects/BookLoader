@@ -44,7 +44,6 @@ class Worker(QtCore.QRunnable): # pylint: disable=(c-extension-no-member)
     ''' Thread Worker '''
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
-
         # Store constructor arguments (re-used for processing)
         self.fn = fn
         self.args = args
@@ -120,8 +119,9 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             'categories_box'    :True,
             'image_box'         :True
         }
-        self.current_dir = pathlib.Path(__file__).parent # Setting curret ABS path
 
+        self.image_list = []
+        self.current_dir = pathlib.Path(__file__).parent # Setting curret ABS path
         self.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member)
         self.setWindowTitle("Book Loader")
 
@@ -164,7 +164,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.msg_box = QtWidgets.QMessageBox() # pylint: disable=(c-extension-no-member)
         self.msg_to_send = QtWidgets.QMessageBox() # pylint: disable=(c-extension-no-member)
         self.options = QtWidgets.QFileDialog.Options() # pylint: disable=(c-extension-no-member)
-        self.screen_size = QtWidgets.QDesktopWidget().screenGeometry(-1)
+        self.screen_size = QtWidgets.QDesktopWidget().screenGeometry(-1) # pylint: disable=(c-extension-no-member)
         self.word_press_button.setShortcut("Ctrl+Return")
         self.setTabOrder(self.title_line,self.author_line)
         self.setTabOrder(self.publisher_line,self.category_line)
@@ -188,6 +188,12 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.shortcut_sale = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+s"), self)
         self.shortcut_sale.activated.connect(lambda: self.sale_check_box.setChecked(False)
                                              if self.sale_check_box.isChecked() else self.sale_check_box.setChecked(True))
+        self.shortcut_next_image = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+right"), self)
+        self.shortcut_next_image.activated.connect(self.next_image)
+        self.shortcut_previous_image = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+left"), self)
+        self.shortcut_previous_image.activated.connect(self.previous_image)
+        self.next_image_buttom.clicked.connect(self.next_image)
+        self.previous_image_buttom.clicked.connect(self.previous_image)
 
     #     self.load_button2.clicked.connect(self.search_in_book)
 
@@ -198,7 +204,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def get_shortname_colon(self):
         ''' Remove subtitle between colon and dash '''
         colon = re.compile(':(.*?)-')
-        short = re.sub(colon, " - ", self.name_line.toPlainText())
+        short = re.sub(colon, " -", self.name_line.toPlainText())
         self.name_line.setText(short)
         self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
         self.amount_line.setFocus()
@@ -206,7 +212,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def get_shortname_comma(self):
         ''' Remove subtitle between comma and dash '''
         comma = re.compile(',(.*?)-')
-        short = re.sub(comma, " - ", self.name_line.toPlainText())
+        short = re.sub(comma, " -", self.name_line.toPlainText())
         self.name_line.setText(short)
         self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
         self.amount_line.setFocus()
@@ -214,7 +220,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def get_shortname_parenthesis(self):
         ''' Remove subtitle between parenthesis and dash '''
         parenthesis = re.compile("\((.*?)-")
-        short = re.sub(parenthesis, " - ", self.name_line.toPlainText())
+        short = re.sub(parenthesis, " -", self.name_line.toPlainText())
         self.name_line.setText(short)
         self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
         self.amount_line.setFocus()
@@ -307,10 +313,16 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def put_dict(self):
         ''' Put dictionary to editlines '''
         self.msg_box.close()
+        self.image_list = []
         self.update_info_label.clear()
-
+        if self.dictionary['source'] is False:
+            self.get_image_list()
+        else:
+            self.image_list.append(self.dictionary_woo['image'])
+        self.image_iterator = 0
         try:
-            self.dictionary["image"] = get_image(self.dictionary['image'], self.item)
+            
+            self.dictionary["image"] = get_image(self.image_list[0], self.item)
         except Exception as error: # pylint: disable=broad-except
             logger.info(error)
             self.dictionary["image"] = None
@@ -344,6 +356,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             self.cover_image_label.setPixmap(QtGui.QPixmap(self.dictionary['image'])) # pylint: disable=(c-extension-no-member)
             if self.dictionary['source'] is False:
                 self.source_label.setText("Stwórz nowy produkt")
+                self.amount_line.setText('1')
             else:
                 self.source_label.setText("Zaktualizuj istniejący produkt")
                 self.id_line.setText(str(self.dictionary['id']))
@@ -356,13 +369,10 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
                         self.release_check_box.setChecked(True)
                 try:
                     self.sale_price_line.setText(str(self.dictionary['sale_price']))
+                    self.amount_line.setText(str(self.dictionary['amount']))
+                    self.price_line.setText(str(self.dictionary['price']))
                 except Exception as error:  # pylint: disable=broad-except
                     logger.info(error)
-        except Exception as error:  # pylint: disable=broad-except
-            logger.info(error)
-        try:
-            self.amount_line.setText(str(self.dictionary['amount']))
-            self.price_line.setText(str(self.dictionary['price']))
         except Exception as error:  # pylint: disable=broad-except
             logger.info(error)
 
@@ -374,14 +384,42 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.title_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.title_line.text()))
         self.amount_line.setFocus()
 
-    def word(self,progress_callback):
-        ''' Worker to send product to Woocommerce '''
-        progress_callback.emit()
-        self.post_product = woo(self.woocommerce_dict) # pylint: disable=(attribute-defined-outside-init)
-        if self.post_product['source']:
-            self.message = "Produkt został zaktualizowany" # pylint: disable=(attribute-defined-outside-init)
-        else:
-            self.message = "Dodano nowy produkt" # pylint: disable=(attribute-defined-outside-init)
+    def get_dictionary(self):
+        ''' Getting dictionary from edit lines '''
+        tags = []
+        if self.sale_check_box.isChecked():
+            tags.append('Sale')
+        if self.release_check_box.isChecked():
+            tags.append('New Release')
+        if self.gift_check_box.isChecked():
+            tags.append('Perfect Gift')
+
+        try:
+            self.dictionary_to_save = { # pylint: disable=(attribute-defined-outside-init)
+                'isbn' : self.isbn_line.text(),
+                'name' : self.name_line.toPlainText(),
+                'title' : self.title_line.text(),
+                'authors' : self.author_line.text(),
+                'description' : self.description_text_edit.toPlainText(),
+                'binding' : self.binding_box.currentText(),
+                'publisher' : self.publisher_line.text(),
+                'publish_date' : self.year_line.text(),
+                'image': self.dictionary['image'],
+                'categories' : self.category_to_save,
+                'price' : self.price_line.text(),
+                'amount' : self.amount_line.text(),
+                'source' : self.dictionary['source'],
+                'tags' : tags
+            }
+
+            if self.dictionary["source"]:
+                self.dictionary_to_save['id'] = self.dictionary["id"]
+            if self.sale_price_line.text():
+                self.dictionary_to_save['sale_price'] = self.sale_price_line.text()
+
+        except Exception as error:  # pylint: disable=broad-except
+            logger.info(error)
+        return self.dictionary_to_save
 
     def send_to_wordpress(self):
         ''' Method to send product / Check line edit if not empty '''
@@ -399,6 +437,48 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             self.threadpool.start(worker)
             worker.signals.finished.connect(lambda: self.update_info_label.setText(self.message))
             self.clear_line_edit()
+            self.load_button.setDisabled(True)
+
+    def word(self,progress_callback):
+        ''' Worker to send product to Woocommerce '''
+        progress_callback.emit()
+        self.post_product = woo(self.woocommerce_dict) # pylint: disable=(attribute-defined-outside-init)
+        if self.post_product['source']:
+            self.message = "Produkt został zaktualizowany" # pylint: disable=(attribute-defined-outside-init)
+        else:
+            self.message = "Dodano nowy produkt" # pylint: disable=(attribute-defined-outside-init)
+
+    def get_image_list(self):
+        """ Merge image list """
+        for dictionary in self.dictionary['image']:
+            for links in dictionary.values():
+                self.image_list += links
+        
+        for link in self.image_list:
+            if link == None:
+                self.image_list.remove(link)
+        
+        self.image_list = list(set(self.image_list))
+
+    def next_image(self):
+        """ Next image from list """
+        if len(self.image_list) > 1:
+            self.image_iterator += 1
+            if len(self.image_list) == self.image_iterator:
+                self.image_iterator = 0
+        
+            self.dictionary["image"] = get_image(self.image_list[self.image_iterator], self.item)
+            self.cover_image_label.setPixmap(QtGui.QPixmap(self.dictionary['image'])) # pylint: disable=(c-extension-no-member)
+
+    def previous_image(self):
+        """ Previous image from list """
+        if len(self.image_list) > 1:
+            self.image_iterator -= 1
+            if self.image_iterator == -1:
+                self.image_iterator = len(self.image_list) -1
+        
+            self.dictionary["image"] = get_image(self.image_list[self.image_iterator], self.item)
+            self.cover_image_label.setPixmap(QtGui.QPixmap(self.dictionary['image'])) # pylint: disable=(c-extension-no-member)
 
     def change_image(self):
         ''' Change image button method '''
@@ -438,44 +518,6 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.release_check_box.setChecked(False)
         self.gift_check_box.setChecked(False)
 
-    def get_dictionary(self):
-        ''' Getting dictionary from edit lines '''
-        tags = []
-        if self.sale_check_box.isChecked():
-            tags.append('Sale')
-        if self.release_check_box.isChecked():
-            tags.append('New Release')
-        if self.gift_check_box.isChecked():
-            tags.append('Perfect Gift')
-
-        try:
-            self.dictionary_to_save = { # pylint: disable=(attribute-defined-outside-init)
-                'isbn' : self.isbn_line.text(),
-                'name' : self.name_line.toPlainText(),
-                'title' : self.title_line.text(),
-                'authors' : self.author_line.text(),
-                'description' : self.description_text_edit.toPlainText(),
-                'binding' : self.binding_box.currentText(),
-                'publisher' : self.publisher_line.text(),
-                'publish_date' : self.year_line.text(),
-                'image': self.dictionary['image'],
-                'categories' : self.category_to_save,
-                'price' : self.price_line.text(),
-                'amount' : self.amount_line.text(),
-                'source' : self.dictionary['source'],
-                'tags' : tags
-            }
-
-            if self.dictionary["source"]:
-                self.dictionary_to_save['id'] = self.dictionary["id"]
-            if self.sale_price_line.text():
-                self.dictionary_to_save['sale_price'] = self.sale_price_line.text()
-
-        except Exception as error:  # pylint: disable=broad-except
-            logger.info(error)
-        return self.dictionary_to_save
-
-    # Save to file
     def save_item(self):
         ''' Save to file method '''
         self.category_exist() # Start function to check category from header list
@@ -492,7 +534,6 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
                 self.save_item_csv()
         except Exception as error:  # pylint: disable=broad-except
             logger.info(error)
-
 
         self.isbn_line.setFocus()
 
@@ -522,8 +563,6 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.settings_window.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member)
         self.settings_ui = Ui_Settings() # pylint: disable=(attribute-defined-outside-init)
         self.settings_ui.setupUi(self.settings_window)
-
-        
 
         # Set Parser for config.ini
         config = configparser.ConfigParser()
@@ -572,6 +611,9 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         if reply == QtWidgets.QMessageBox.Yes: # pylint: disable=(c-extension-no-member)
             event.accept()
             print('Window closed')
+            cache = pathlib.Path(os.path.join(self.current_dir, "cache"))
+            if cache.exists() and cache.is_dir():
+                shutil.rmtree(cache)
         else:
             event.ignore()
 
