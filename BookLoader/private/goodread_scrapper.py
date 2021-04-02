@@ -1,7 +1,7 @@
+''' Goodread Scrapper '''
 import requests
 from bs4 import BeautifulSoup
 from googlesearch import search
-import lxml
 
 
 def goodread_search(item):
@@ -64,7 +64,6 @@ def goodread_search(item):
     # Find image source
     try:
         image = soup.find("img",attrs={'id':"coverImage"}).attrs['src']
-    
     except:
         image = None
 
@@ -128,7 +127,7 @@ def goodread_search(item):
     goodread_dict = {
         "title" : title,
         'author' : author,
-        'image' : image,
+        'image' : [image],
         'categories' : category_list,
         'description' : description,
         'binding' : binding,
