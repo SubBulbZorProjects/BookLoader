@@ -47,8 +47,8 @@ def get_image(image_url, isbn):
         if request.status_code == 200:
             with open(path, 'wb') as file:
                 request.raw.decode_content = True
-                shutil.copyfileobj(request.raw, file)  
-                print(request.from_cache)
+                shutil.copyfileobj(request.raw, file)
+                # print(request.from_cache)
                 return path
 
     except Exception as error: # pylint: disable=broad-except
