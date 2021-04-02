@@ -4,9 +4,11 @@ import configparser  # Read config file.
 import logging  # Logging errors.
 import os  # Just os module?
 import re  # Regex.
+from pathlib import Path  # Create a directory if needed.
 from threading import Thread  # Multi thread.
 
 import requests as req  # Requests HTTP Library.
+import requests_cache  # Cache API requests.
 from fuzzywuzzy import fuzz  # String similarity.
 
 from private.amazon_scrapper import main as amazon_scrapper  # Amazon scrapper.
@@ -47,6 +49,11 @@ class Books: # pylint: disable=too-few-public-methods, too-many-instance-attribu
 
     def __get_isbndb_request(self, isbn):
         '''Get ISBNdb api request'''
+
+        Path(os.path.join(current_dir, "cache")).mkdir(parents=True, exist_ok=True)
+        cache = os.path.join(current_dir, "cache", "scraper_cache")
+        requests_cache.install_cache(cache, backend='sqlite', expire_after=300)
+
         try:
             response = req.get((self.isbndb_url+isbn), headers=self.isbndb_header)
 
@@ -57,6 +64,11 @@ class Books: # pylint: disable=too-few-public-methods, too-many-instance-attribu
 
     def __get_google_request(self, isbn):
         '''Get Google api request'''
+
+        Path(os.path.join(current_dir, "cache")).mkdir(parents=True, exist_ok=True)
+        cache = os.path.join(current_dir, "cache", "scraper_cache")
+        requests_cache.install_cache(cache, backend='sqlite', expire_after=300)
+
         try:
             response = req.get(self.google_url+isbn+self.google_header)
 
