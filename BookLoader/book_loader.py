@@ -120,9 +120,10 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             'image_box'         :True
         }
 
+        self.image_iterator = 0
         self.image_list = []
         self.current_dir = pathlib.Path(__file__).parent # Setting curret ABS path
-        self.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member)
+        self.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member, line-too-long)
         self.setWindowTitle("Book Loader")
 
         self.progress_bar = QtWidgets.QProgressBar() # pylint: disable=(c-extension-no-member)
@@ -173,24 +174,24 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.setTabOrder(self.amount_line,self.price_line)
         self.setTabOrder(self.price_line,self.sale_price_line)
         self.setTabOrder(self.sale_price_line,self.description_text_edit)
-        self.shortcut_colon = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+;"), self)
+        self.shortcut_colon = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+;"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_colon.activated.connect(self.get_shortname_colon)
-        self.shortcut_comma = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+,"), self)
+        self.shortcut_comma = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+,"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_comma.activated.connect(self.get_shortname_comma)
-        self.shortcut_parenthesis = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+9"), self)
+        self.shortcut_parenthesis = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+9"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_parenthesis.activated.connect(self.get_shortname_parenthesis)
-        self.shortcut_gift = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+g"), self)
+        self.shortcut_gift = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+g"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_gift.activated.connect(lambda: self.gift_check_box.setChecked(False)
-                                             if self.gift_check_box.isChecked() else self.gift_check_box.setChecked(True))
-        self.shortcut_release = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+n"), self)
+                                             if self.gift_check_box.isChecked() else self.gift_check_box.setChecked(True)) # pylint: disable=(line-too-long)
+        self.shortcut_release = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+n"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_release.activated.connect(lambda: self.release_check_box.setChecked(False)
-                                             if self.release_check_box.isChecked() else self.release_check_box.setChecked(True))
-        self.shortcut_sale = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+s"), self)
+                                             if self.release_check_box.isChecked() else self.release_check_box.setChecked(True)) # pylint: disable=(line-too-long)
+        self.shortcut_sale = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+s"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_sale.activated.connect(lambda: self.sale_check_box.setChecked(False)
-                                             if self.sale_check_box.isChecked() else self.sale_check_box.setChecked(True))
-        self.shortcut_next_image = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+right"), self)
+                                             if self.sale_check_box.isChecked() else self.sale_check_box.setChecked(True)) # pylint: disable=(line-too-long)
+        self.shortcut_next_image = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+right"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_next_image.activated.connect(self.next_image)
-        self.shortcut_previous_image = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+left"), self)
+        self.shortcut_previous_image = QtWidgets.QShortcut(QtGui.QKeySequence("Alt+left"), self) # pylint: disable=(c-extension-no-member)
         self.shortcut_previous_image.activated.connect(self.previous_image)
         self.next_image_buttom.clicked.connect(self.next_image)
         self.previous_image_buttom.clicked.connect(self.previous_image)
@@ -198,7 +199,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     #     self.load_button2.clicked.connect(self.search_in_book)
 
     # def search_in_book(self):
-        # ''' Download afresh book details ''' 
+        # ''' Download afresh book details '''
     #     self.clear_line_edit()
 
     def get_shortname_colon(self):
@@ -206,7 +207,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         colon = re.compile(':(.*?)-')
         short = re.sub(colon, " -", self.name_line.toPlainText())
         self.name_line.setText(short)
-        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText())) # pylint: disable=(line-too-long)
         self.amount_line.setFocus()
 
     def get_shortname_comma(self):
@@ -214,15 +215,15 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         comma = re.compile(',(.*?)-')
         short = re.sub(comma, " -", self.name_line.toPlainText())
         self.name_line.setText(short)
-        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText())) # pylint: disable=(line-too-long)
         self.amount_line.setFocus()
 
     def get_shortname_parenthesis(self):
         ''' Remove subtitle between parenthesis and dash '''
-        parenthesis = re.compile("\((.*?)-")
+        parenthesis = re.compile("\((.*?)-") # pylint: disable=(anomalous-backslash-in-string)
         short = re.sub(parenthesis, " -", self.name_line.toPlainText())
         self.name_line.setText(short)
-        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
+        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText())) # pylint: disable=(line-too-long)
         self.amount_line.setFocus()
 
     def progress_fn(self):
@@ -321,7 +322,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             self.image_list.append(self.dictionary_woo['image'])
         self.image_iterator = 0
         try:
-            
+
             self.dictionary["image"] = get_image(self.image_list[0], self.item)
         except Exception as error: # pylint: disable=broad-except
             logger.info(error)
@@ -380,8 +381,8 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         self.save_to_file_button.setDisabled(False)
         self.word_press_button.setDisabled(False)
         self.load_button.setDisabled(True)
-        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText()))
-        self.title_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.title_line.text()))
+        self.name_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.name_line.toPlainText())) # pylint: disable=(line-too-long)
+        self.title_line.setToolTip('<html><head/><body><p><b><span style=\" font-size:16pt;\">{}</span></b></p></body></html>'.format(self.title_line.text())) # pylint: disable=(line-too-long)
         self.amount_line.setFocus()
 
     def get_dictionary(self):
@@ -453,11 +454,11 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         for dictionary in self.dictionary['image']:
             for links in dictionary.values():
                 self.image_list += links
-        
+
         for link in self.image_list:
-            if link == None:
+            if link is None:
                 self.image_list.remove(link)
-        
+
         self.image_list = list(set(self.image_list))
 
     def next_image(self):
@@ -466,7 +467,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             self.image_iterator += 1
             if len(self.image_list) == self.image_iterator:
                 self.image_iterator = 0
-        
+
             self.dictionary["image"] = get_image(self.image_list[self.image_iterator], self.item)
             self.cover_image_label.setPixmap(QtGui.QPixmap(self.dictionary['image'])) # pylint: disable=(c-extension-no-member)
 
@@ -476,7 +477,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
             self.image_iterator -= 1
             if self.image_iterator == -1:
                 self.image_iterator = len(self.image_list) -1
-        
+
             self.dictionary["image"] = get_image(self.image_list[self.image_iterator], self.item)
             self.cover_image_label.setPixmap(QtGui.QPixmap(self.dictionary['image'])) # pylint: disable=(c-extension-no-member)
 
@@ -560,7 +561,7 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
     def open_settings(self):
         ''' Open settings method '''
         self.settings_window = QtWidgets.QDialog() # pylint: disable=(attribute-defined-outside-init),(c-extension-no-member)
-        self.settings_window.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member)
+        self.settings_window.setWindowIcon(QtGui.QIcon(os.path.join(self.current_dir, "private", "image", "bookloader.png"))) # pylint: disable=(c-extension-no-member, line-too-long)
         self.settings_ui = Ui_Settings() # pylint: disable=(attribute-defined-outside-init)
         self.settings_ui.setupUi(self.settings_window)
 
