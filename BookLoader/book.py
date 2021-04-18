@@ -316,28 +316,31 @@ class Books: # pylint: disable=too-few-public-methods, too-many-instance-attribu
             if self.gui["amazon"]:
                 data_thread_1 = Thread(target=self.__get_amazon_book)
                 data_thread_1.start()
-                #self.get_amazon_book()
+
             if self.gui["goodreads"]:
                 data_thread_2 = Thread(target=self.__get_goodreads_book)
                 data_thread_2.start()
-                #self.get_goodreads_book()
+
             if self.gui["isbndb"]:
                 data_thread_3 = Thread(target=self.__get_isbndb_book)
                 data_thread_3.start()
-                #self.get_isbndb_book()
+
             if self.gui["google"]:
                 data_thread_4 = Thread(target=self.__get_google_book)
                 data_thread_4.start()
-                #self.get_google_book()
 
-            data_thread_1.join()
-            data_thread_2.join()
-            data_thread_3.join()
-            data_thread_4.join()
+            if self.gui["amazon"]:
+                data_thread_1.join()
 
-            # image = validator(self.image_list) # pylint: disable=unused-variable
+            if self.gui["goodreads"]:
+                data_thread_2.join()
 
-            image = self.image_list # pylint: disable=unused-variable
+            if self.gui["isbndb"]:
+                data_thread_3.join()
+
+            if self.gui["google"]:
+                data_thread_4.join()
+
             title = validator(self.title_list) # pylint: disable=unused-variable
             authors = validator(self.authors_list) # pylint: disable=unused-variable
             binding = validator(self.binding_list) # pylint: disable=unused-variable
@@ -347,6 +350,10 @@ class Books: # pylint: disable=too-few-public-methods, too-many-instance-attribu
 
             # Variables without validation :
             isbn = self.isbn # pylint: disable=unused-variable
+
+            # Allow to choose from list in GUI :
+            image = self.image_list # pylint: disable=unused-variable
+            description = self.description_list # pylint: disable=unused-variable
 
             # Categories :
             fuzzy = Fuzzer(similarity_list=self.categories_list)
