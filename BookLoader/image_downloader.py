@@ -1,5 +1,6 @@
 '''download image'''
 import configparser  # Read config file.
+import glob  # Filename globing utility.
 import logging  # Logging errors.
 import os  # Just os module?
 import shutil  # Clear directory.
@@ -33,9 +34,16 @@ def get_image(image_url, isbn):
     try:
         image_path = os.path.join(current_dir, image_folder)
         image_path = Path(image_path)
+        image_files = glob.glob(os.path.join(image_path, "*"))
         if image_path.exists() and image_path.is_dir():
-            shutil.rmtree(image_path)
-        Path(image_path).mkdir(parents=True, exist_ok=True)
+            for image in image_files:
+                try:
+                    Path(image).unlink()
+                except OSError as error:
+                    print("Error: %s : %s" % (image, error.strerror))
+
+        else:
+            Path(image_path).mkdir(parents=True, exist_ok=True)
 
     except Exception as error: # pylint: disable=broad-except
         logger.info(error)
