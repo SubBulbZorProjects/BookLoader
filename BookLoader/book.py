@@ -469,8 +469,8 @@ def validator(validation_list): # pylint: disable=too-many-branches, too-many-re
     priority = config.get("Validator", "priority")
     source_list = [list(source.values())[0] for source in validation_list]
 
-    # Remove empty entry from main dictionary
     try:
+        # Remove empty entry from main dictionary
         loop = validation_list.copy()
         for source in loop:
             for discard in discard_list:
@@ -480,8 +480,8 @@ def validator(validation_list): # pylint: disable=too-many-branches, too-many-re
     except Exception as error: # pylint: disable=broad-except
         logger.info(error)
 
-    # Remove empty entry from list
     try:
+         # Remove empty entry from list
         for discard in discard_list:
             while discard in source_list: source_list.remove(discard) # pylint: disable=multiple-statements
         if len(source_list) > 1:
