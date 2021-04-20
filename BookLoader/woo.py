@@ -7,14 +7,13 @@ from pathlib import Path  # Create a directory if needed.
 
 from woocommerce import API as woo  # woocommerce API
 
+from database import MySQL # MySQL Query.
 from wp import main as wp  # WordPress API
 
 current_dir = (os.path.dirname(os.path.realpath(__file__)))
 Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
 logging_path = os.path.join(current_dir, "logs", "Woo.log")
-
-# DEBUG -> WARNING :
-logging.basicConfig(filename=logging_path, level=logging.DEBUG,
+logging.basicConfig(filename=logging_path, level=logging.WARNING,
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger=logging.getLogger(__name__)
 
@@ -46,6 +45,24 @@ class WooCommerce: # pylint: disable=too-few-public-methods
             )
         except Exception as error: # pylint: disable=broad-except
             logger.info(error)
+        return response
+
+    def get_woo_product(self, post_id):
+        '''Get WooCommerce product'''
+        try:
+            auth = self.get_woo_request()
+            # response = auth.get("products").json()
+            response = auth.get("products/" + str(post_id)).json()
+
+            # Send none if status code found in error codes
+            if "data" in response:
+                if response.get("data", {}).get("status") in self.error_codes:
+                    self.error_catch.append(inspect.getouterframes(inspect.currentframe())[0].function) # pylint: disable=line-too-long
+                    return None
+
+        except Exception as error: # pylint: disable=broad-except
+            logger.info(error)
+
         return response
 
     def get_woo_products(self, page):
@@ -429,36 +446,34 @@ class WooCommerce: # pylint: disable=too-few-public-methods
                 logger.info(error)
 
             if response["data"]["status"] == 400:
-                page_number = 0
-                while True:
-                    page_number += 1
+
+                try:
+                    mysql_request = MySQL(isbn=self.book["isbn"])
+                    request = mysql_request.db_mysql()
+
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
+
+                if request:
+                    product = self.get_woo_product(request)
+                    if product["stock_quantity"]:
+                        data["stock_quantity"] = int(data["stock_quantity"]) + product["stock_quantity"]  # pylint: disable=line-too-long
+
                     try:
-                        products = self.get_woo_products(page_number)
+                        response = self.update_woo_products(product["id"], data)
+                        output = {
+                            'id'            :response["id"],
+                            'name'          :response["name"],
+                            'link'          :response["permalink"],
+                            'source'        :True
+                        }
+
+                        return output
+
                     except Exception as error:  # pylint: disable=broad-except
                         logger.info(error)
-
-                    if products:
-                        for product in products:
-                            if product["sku"] == str(self.book["isbn"]):
-                                if product["stock_quantity"]:
-                                    data["stock_quantity"] = int(data["stock_quantity"]) + product["stock_quantity"]  # pylint: disable=line-too-long
-
-                                response = self.update_woo_products(product["id"], data)
-
-                                try:
-                                    output = {
-                                        'id'            :response["id"],
-                                        'name'          :response["name"],
-                                        'link'          :response["permalink"],
-                                        'source'        :True
-                                    }
-
-                                    return output
-
-                                except Exception as error:  # pylint: disable=broad-except
-                                    logger.info(error)
-                    else:
-                        return None
+                else:
+                    return None
 
         except Exception as error:  # pylint: disable=broad-except
             logger.info(error)
@@ -539,81 +554,88 @@ class WooCommerce: # pylint: disable=too-few-public-methods
 
 def get_product(book, gui):
     '''Get product form Woo'''
+
+    dictionary = {}
+
     try:
-        product = WooCommerce(book=book)
-        request = product.search_for_product()
+        # Get product ID from DB.
+        mysql_request = MySQL(isbn=book)
+        mysql_response = mysql_request.db_mysql()
 
-        dictionary = {}
-        if request:
-            try:
-                dictionary["id"] = request["id"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+        if mysql_response:
+            product = WooCommerce(book=book)
+            request = product.get_woo_product(mysql_response)
 
-            try:
-                for attribute in request["attributes"]:
-                    dictionary[product.get_translation(attribute["name"],
-                            "en")] = product.list_expander(attribute["options"]).replace("amp;","")
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+            if request:
+                try:
+                    dictionary["id"] = request["id"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            try:
-                dictionary["name"] = request["name"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    for attribute in request["attributes"]:
+                        dictionary[product.get_translation(attribute["name"],
+                                "en")] = product.list_expander(attribute["options"]).replace("amp;","") # pylint: disable=line-too-long
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            try:
-                dictionary["description"] = request["description"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    dictionary["name"] = request["name"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            try:
-                categories_list = []
-                categories = request["categories"]
-                for category in categories:
-                    categories_list.append(category["name"].replace("amp;",""))
+                try:
+                    dictionary["description"] = request["description"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-                dictionary["categories"] = categories_list
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    categories_list = []
+                    categories = request["categories"]
+                    for category in categories:
+                        categories_list.append(category["name"].replace("amp;",""))
 
-            try:
-                tags_list = []
-                tags = request["tags"]
-                for tag in tags:
-                    tags_list.append(tag["name"].replace("amp;",""))
+                    dictionary["categories"] = categories_list
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-                dictionary["tags"] = tags_list
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    tags_list = []
+                    tags = request["tags"]
+                    for tag in tags:
+                        tags_list.append(tag["name"].replace("amp;",""))
 
-            try:
-                dictionary["image"] = request["images"][0]["src"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                    dictionary["tags"] = tags_list
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            try:
-                dictionary["price"] = request["regular_price"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    dictionary["image"] = request["images"][0]["src"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            try:
-                dictionary["sale_price"] = request["sale_price"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    dictionary["price"] = request["regular_price"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            try:
-                dictionary["amount"] = request["stock_quantity"]
-            except Exception as error:  # pylint: disable=broad-except
-                logger.info(error)
+                try:
+                    dictionary["sale_price"] = request["sale_price"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-            for key in gui:
-                if "_box" in key and gui[key]:
-                    if key.split('_box')[0] not in dictionary:
-                        dictionary[key.split('_box')[0]] = None
+                try:
+                    dictionary["amount"] = request["stock_quantity"]
+                except Exception as error:  # pylint: disable=broad-except
+                    logger.info(error)
 
-                    if dictionary[key.split('_box')[0]] == "":
-                        dictionary[key.split('_box')[0]] = None
+                for key in gui:
+                    if "_box" in key and gui[key]:
+                        if key.split('_box')[0] not in dictionary:
+                            dictionary[key.split('_box')[0]] = None
+
+                        if dictionary[key.split('_box')[0]] == "":
+                            dictionary[key.split('_box')[0]] = None
 
     except Exception as error:  # pylint: disable=broad-except
         logger.info(error)
