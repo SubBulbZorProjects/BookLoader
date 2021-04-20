@@ -13,4 +13,6 @@ Book Loader is a simple desktop application that helps you automate some process
   * Goodreads
 
 * CMS integration :
-  * WordPress (WooCommerce)
+  * WordPress - API
+  * WooCommerce - API
+  * WooCommerce - MySQL

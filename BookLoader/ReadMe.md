@@ -64,6 +64,13 @@ Google API is free of charge.
 * *user* - is the name of the application generated from [WordPress](https://pl.wordpress.org/plugins/application-passwords/)
 * *secret* - is a password generated from [WordPress](https://pl.wordpress.org/plugins/application-passwords/)
 
+**MySQL** section:
+
+* *host* - is your database server hostname or ip address.
+* *user* - is user db user name.
+* *password* - is password for db user.
+* *database* - is your database name.
+
 **Source** section:
 
 The Source section allows you to decide which source should be used by the program.
@@ -89,4 +96,4 @@ The **get_product** function allows you to retrieve information about an existin
 the **main** function allows you to upload an image to a media library.  
 The image is uploaded as the full local path, the url is returned.
 
-**image_downloader.py** *is responsible for downloading the image.*
+[database.py](database.py) is responsible for simple integration with MySQL, product search is much faster than with API.

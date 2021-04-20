@@ -10,3 +10,5 @@ beautifulsoup4
 google
 lxml
 requests-cache
+pillow
+mysql-connector-python
