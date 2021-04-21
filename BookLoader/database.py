@@ -11,7 +11,7 @@ current_dir = (os.path.dirname(os.path.realpath(__file__)))
 
 # Start logging.
 Path(os.path.join(current_dir, "logs")).mkdir(parents=True, exist_ok=True)
-logging_path = os.path.join(current_dir, "logs", "sql")
+logging_path = os.path.join(current_dir, "logs", "sql.log")
 logging.basicConfig(filename=logging_path, level=logging.WARNING,
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger=logging.getLogger(__name__)
