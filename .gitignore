@@ -4,6 +4,7 @@
 *.json
 *.db
 *.jpg
+*.sqlite
 
 ./settings.json
 .google-cookie
