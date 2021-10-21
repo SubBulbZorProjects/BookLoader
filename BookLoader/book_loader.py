@@ -667,7 +667,6 @@ class MyMainWindow(QtWidgets.QMainWindow, Ui_MainWindow): # pylint: disable=(c-e
         progress_callback.emit()
         try:
             self.post_product = woo(self.woocommerce_dict) # pylint: disable=(attribute-defined-outside-init)
-            print(self.post_product)
             if self.post_product['source']:
                 self.message = "Produkt został zaktualizowany" # pylint: disable=(attribute-defined-outside-init)
             else:

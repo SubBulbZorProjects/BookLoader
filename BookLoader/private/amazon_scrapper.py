@@ -3,7 +3,7 @@ import re
 from threading import Thread
 import requests
 from bs4 import BeautifulSoup
-from googlesearch import search
+import time
 
 
 class AmazonScrapper:
@@ -21,25 +21,90 @@ class AmazonScrapper:
         self.image_list = []
         self.url_list = []
         self.amazon_dict = {}
+        self.time_start = time.time()
         self.get_url_list()
         self.unpack_url_list()
 
     def get_url_list(self):
-        ''' Find urls from google '''
-        link = self.item + ' site:www.amazon.com OR site:www.amazon.co.uk'
-        for url in search(link,tld='com',start=0,stop=4, pause=0.1):
-            self.url_list.append(url)
-        print(self.url_list)
+        ''' Find urls in threads '''
+
+        try:
+            co_uk_thread = Thread(target=self.get_co_uk_list)
+            co_uk_thread.start()
+
+            com_thread = Thread(target=self.get_com_list)
+            com_thread.start()
+
+            co_uk_thread.join()
+            com_thread.join()
+        except Exception as error:
+            print(error)
+            pass
+
+
+    def get_co_uk_list(self):
+        ''' Find urls from amazon.co.uk '''
+        headers = {
+        "User-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
+        "action": "sign-in"
+        }
+        try:
+            url = 'https://www.amazon.co.uk/s?k={}&ref=nb_sb_noss'.format(self.item)
+            requests_session = requests.Session()
+            requests_session.headers = headers
+            page = requests_session.get(url, headers=headers)
+            soup = BeautifulSoup(page.content, 'lxml',from_encoding=page.encoding)
+            span_list = soup.find("div",attrs={"class": "s-main-slot s-result-list s-search-results sg-row"})
+            span_list = span_list.findAll("div",attrs={"class": "a-section a-spacing-medium"})
+
+            for index, span in enumerate(span_list):
+                if index == 3:
+                    break
+                links = span.findAll("a",attrs={"class":"a-link-normal"})
+                for link in links:
+                    if self.item in link.attrs['href'] and ("Hardcover" in link.get_text() or "Paperback" in link.get_text()):
+                        self.url_list.append("https://www.amazon.co.uk{}".format(link.attrs['href']))
+
+        except Exception as error:
+            print(error)
+            pass
+
+    def get_com_list(self):
+        ''' Find urls from amazon.com '''
+        headers = {
+        "User-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
+        "action": "sign-in"
+        }
+        try:
+            url = 'https://www.amazon.com/s?k={}&ref=nb_sb_noss'.format(self.item)
+            requests_session = requests.Session()
+            requests_session.headers = headers
+            page = requests_session.get(url, headers=headers)
+            soup = BeautifulSoup(page.content, 'lxml',from_encoding=page.encoding)
+            span_list = soup.find("div",attrs={"class": "s-main-slot s-result-list s-search-results sg-row"})
+            span_list = span_list.findAll("div",attrs={"class": "a-section a-spacing-medium"})
+
+            for index, span in enumerate(span_list):
+                if index == 3:
+                    break
+                links = span.findAll("a",attrs={"class":"a-link-normal"})
+                for link in links:
+                    if self.item in link.attrs['href'] and ("Hardcover" in link.get_text() or "Paperback" in link.get_text()):
+                        self.url_list.append("https://www.amazon.com{}".format(link.attrs['href']))
+
+        except Exception as error:
+            print(error)
+            pass
 
     def get_product(self,amazon_url):
         ''' Parse and scrapp page '''
         headers = {
-        "User-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64)",
+        "User-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 Edg/89.0.774.77",
         "action": "sign-in"
         }
         requests_session = requests.Session()
         page = requests_session.get(amazon_url, headers=headers)
-        soup = BeautifulSoup(page.content, 'lxml',from_encoding=page.encoding)
+        soup = BeautifulSoup(page.content, 'lxml', from_encoding=page.encoding)
 
         # Book details
         try:
@@ -64,6 +129,7 @@ class AmazonScrapper:
         try:
             isbn = isbn.replace('\n','').replace("-",'')
             isbn = isbn.split(':')[1]
+            isbn = isbn.encode("ascii", "ignore").decode("utf-8")
         except Exception: # pylint: disable=broad-except
             pass
 
@@ -72,6 +138,7 @@ class AmazonScrapper:
                 return self.amazon_dict
         except Exception: # pylint: disable=broad-except
             isbn = None
+            return self.amazon_dict
 
         # Find Title
         try:
@@ -157,6 +224,7 @@ class AmazonScrapper:
         try:
             publisher = pub_info.split(":")[1]
             publisher = publisher.split(";")[0].replace("\n","").split("(")[0]
+            publisher = publisher.encode("ascii", "ignore").decode("utf-8")
             self.publisher_list.append(publisher)
         except Exception: # pylint: disable=broad-except
             publisher = None
@@ -170,6 +238,7 @@ class AmazonScrapper:
 
         try:
             binding = bind.split(":")[0].replace("\n","")
+            binding = binding.encode("ascii", "ignore").decode("utf-8")
             self.bind_list.append(binding)
         except Exception: # pylint: disable=broad-except
             binding = None
@@ -203,7 +272,7 @@ class AmazonScrapper:
         if self.bind_list:
             self.amazon_dict['binding'] = self.bind_list[0]
         if self.description_list:
-            self.amazon_dict['description'] = max(self.description_list, key=len)
+            self.amazon_dict['description'] = self.description_list
 
         return self.amazon_dict
 
