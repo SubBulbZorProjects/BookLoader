@@ -6,7 +6,7 @@ Book Loader tool.
 
 ## Install required packages
 
-```pyhton
+```python
 py -m pip install -r requirements.txt
 ```
 
